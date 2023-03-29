@@ -10,13 +10,24 @@ import time
 import pyautogui
 
 
+
 class Worker(QObject):
-    finished = pyqtSignal()
-    progress = pyqtSignal(int)
+    #finished = pyqtSignal()
+
+    def __init__(self, window):
+        super(Worker, self).__init__()
+        self.pixels = window.pixels
 
     def drawingFunc(self):
         while(True):
             print(pyautogui.position())
+            x, y = pyautogui.position()
+            if (x <= 800 & y<=480):
+                print("drawing!")
+                window.pixels[x,y] = (234,200,122)
+                window.newDrawing.save("new_drawing", format="png")
+
+            time.sleep(1)
 
 
 class MainWindow(QMainWindow):
@@ -33,18 +44,16 @@ class MainWindow(QMainWindow):
         self.menu.clicked.connect(self.colorSelect)
 
         #creating a blank white image that will be the base for the drawing screen
-        newDrawing = Image.new(mode="RGB", size=(800, 480),
-                        color="white")
-  
-        newDrawing.save("new_drawing", format="png")
-        pixels = newDrawing.load()
+        self.newDrawing = Image.new(mode="RGB", size=(800, 480), color="blue")
+        
+        self.pixels = self.newDrawing.load()
 
     #Function that connects the worker class to the main thread
     def drawingFunc(self):
         self.thread = QThread()
-        self.worker = Worker()
+        self.worker = Worker(self)
         self.worker.moveToThread(self.thread)
-        self.thread.started.connect(self.worker.drawingFunc)
+        self.thread.started.connect(self.worker.drawingFunc())
         self.thread.start()
 
 
@@ -52,7 +61,18 @@ class MainWindow(QMainWindow):
     def colorSelect(self):
         # opening color dialog
         color = QColorDialog.getColor()
-        self.currColor.setText(color.name())
+        colorHex = color.name()
+        self.currColor.setText(colorHex)
+        
+        #getting the hex value into RGB format
+        red = (16 * int(colorHex[1],16)) + (int(colorHex[2],16))
+        green = (16 * int(colorHex[3],16)) + (int(colorHex[4],16))
+        blue = (16 * int(colorHex[5],16)) + (int(colorHex[6],16))
+
+        for i in range(800):
+            for j in range(480):
+                self.pixels[i,j] = (red,green,blue)
+        self.newDrawing.save("new_drawing", format="png")
         self.show()
         return color
  
