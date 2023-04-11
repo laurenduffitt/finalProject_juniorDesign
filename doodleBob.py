@@ -8,7 +8,7 @@ from pathlib import *
 from PIL import Image
 import time
 import pyautogui
-
+import cv2
 
 
 class Worker(QObject):
@@ -22,11 +22,15 @@ class Worker(QObject):
         while(True):
             print(pyautogui.position())
             x, y = pyautogui.position()
+
             if (x <= 800 & y<=480):
                 print("drawing!")
-                window.pixels[x,y] = (234,200,122)
+                window.pixels[x,y] = (255,255,255)
                 window.newDrawing.save("new_drawing", format="png")
-
+                image = cv2.imread(r'C:\Users\laure\Desktop\College\Pitt\S6\Junior_Design\finalProject_juniorDesign\new_drawing')
+                cv2.imshow('new_drawing', image)
+                cv2.waitKey(1)
+   
             time.sleep(1)
 
 
@@ -44,9 +48,13 @@ class MainWindow(QMainWindow):
         self.menu.clicked.connect(self.colorSelect)
 
         #creating a blank white image that will be the base for the drawing screen
-        self.newDrawing = Image.new(mode="RGB", size=(800, 480), color="blue")
+        self.newDrawing = Image.new(mode="RGB", size=(800, 480), color="white")
         
         self.pixels = self.newDrawing.load()
+
+        #TEMPTEMPTEMP
+        image = cv2.imread(r'C:\Users\laure\Desktop\College\Pitt\S6\Junior_Design\finalProject_juniorDesign\new_drawing')
+        cv2.imshow('new_drawing', image)
 
     #Function that connects the worker class to the main thread
     def drawingFunc(self):
