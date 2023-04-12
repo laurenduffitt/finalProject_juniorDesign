@@ -12,13 +12,16 @@ import cv2 as cv
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
-        uic.loadUi("doodleBob.ui", self)
-  
-        # calling method    
+        uic.loadUi("doodleBob.ui", self) 
         self.setWindowTitle("DoodleBob")
 
+        #default pen color = red, default background color = black, default 
         self.color = [0,0,255]
         self.backgroundColor = [0,0,0]
+        self.penSize = 5
+
+        self.slider.setMinimum(1)
+        self.slider.setMaximum(15)
 
 
     #Pulls up the color selection menu
@@ -26,8 +29,7 @@ class MainWindow(QMainWindow):
         # opening color dialog
         self.color = QColorDialog.getColor()
         colorHex = self.color.name()
-        self.currColor.setText(colorHex)
-        
+         
         #getting the hex value into RGB format
         blue = (16 * int(colorHex[1],16)) + (int(colorHex[2],16))
         green = (16 * int(colorHex[3],16)) + (int(colorHex[4],16))
@@ -44,12 +46,15 @@ class MainWindow(QMainWindow):
     def backColor(self):
         self.backgroundColor = window.colorSelect()
     
- 
+    def sliderChanged(self):
+        self.penSize = self.slider.value()
+    
 
 #Begin main function classes
 
 def draw_circle(event,x,y,flags,param):
-    cv.circle(img,(x,y),5,param[0],-1)
+    sliderSize = window.penSize
+    cv.circle(img,(x,y),sliderSize,param[0],-1)
 
 def clear():
     newColor = window.backgroundColor
@@ -64,8 +69,10 @@ def background():
     cv.rectangle(img, p2, p3, (newColor[0],newColor[1],newColor[2]), cv.FILLED)
 
 
-    
 
+
+
+#Creating the Qapp file
 app = QApplication(sys.argv)
 window = MainWindow()
 
@@ -77,11 +84,9 @@ window.erasePush.clicked.connect(window.erase)
 window.clearPush.clicked.connect(clear)
 window.backgroundPush.clicked.connect(window.backColor)
 window.backgroundPush.clicked.connect(background)
+window.slider.valueChanged.connect(window.sliderChanged)
 
 while(1):
-    #if (window.clearPush.clicked == True):
-    #    print("true")
-    #    img = np.zeros((512,512,3), np.uint8)
     color = window.color
     red = color[0]
     green = color[1]
