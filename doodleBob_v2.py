@@ -36,21 +36,35 @@ class MainWindow(QMainWindow):
 
         self.show()
         return self.color
+   
+    def erase(self):
+        self.color = [0,0,0]
+    
  
 
 def draw_circle(event,x,y,flags,param):
     cv.circle(img,(x,y),5,param[0],-1)
 
+def clear():
+    p2 = 0, 512    
+    p3 = 512, 0
+    cv.rectangle(img, p2, p3, (0,0,0), cv.FILLED)
+    
 
 app = QApplication(sys.argv)
 window = MainWindow()
 
 img = np.zeros((512,512,3), np.uint8)
 
-#functions that connect to the functions to the let the user change the color and that let the user draw
+#functions that connect to the functions in the MainWindow of the user interface
 window.menu.clicked.connect(window.colorSelect)
+window.erasePush.clicked.connect(window.erase)
+window.clearPush.clicked.connect(clear)
 
 while(1):
+    #if (window.clearPush.clicked == True):
+    #    print("true")
+    #    img = np.zeros((512,512,3), np.uint8)
     color = window.color
     red = color[0]
     green = color[1]
