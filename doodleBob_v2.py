@@ -18,6 +18,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("DoodleBob")
 
         self.color = [0,0,255]
+        self.backgroundColor = [0,0,0]
 
 
     #Pulls up the color selection menu
@@ -28,9 +29,9 @@ class MainWindow(QMainWindow):
         self.currColor.setText(colorHex)
         
         #getting the hex value into RGB format
-        red = (16 * int(colorHex[1],16)) + (int(colorHex[2],16))
+        blue = (16 * int(colorHex[1],16)) + (int(colorHex[2],16))
         green = (16 * int(colorHex[3],16)) + (int(colorHex[4],16))
-        blue = (16 * int(colorHex[5],16)) + (int(colorHex[6],16))
+        red = (16 * int(colorHex[5],16)) + (int(colorHex[6],16))
 
         self.color = [red,green,blue]
 
@@ -38,17 +39,31 @@ class MainWindow(QMainWindow):
         return self.color
    
     def erase(self):
-        self.color = [0,0,0]
+        self.color = self.backgroundColor
+    
+    def backColor(self):
+        self.backgroundColor = window.colorSelect()
     
  
+
+#Begin main function classes
 
 def draw_circle(event,x,y,flags,param):
     cv.circle(img,(x,y),5,param[0],-1)
 
 def clear():
+    newColor = window.backgroundColor
     p2 = 0, 512    
     p3 = 512, 0
-    cv.rectangle(img, p2, p3, (0,0,0), cv.FILLED)
+    cv.rectangle(img, p2, p3, (newColor[0],newColor[1],newColor[2]), cv.FILLED)
+
+def background():
+    newColor = window.color
+    p2 = 0, 512    
+    p3 = 512, 0
+    cv.rectangle(img, p2, p3, (newColor[0],newColor[1],newColor[2]), cv.FILLED)
+
+
     
 
 app = QApplication(sys.argv)
@@ -60,6 +75,8 @@ img = np.zeros((512,512,3), np.uint8)
 window.menu.clicked.connect(window.colorSelect)
 window.erasePush.clicked.connect(window.erase)
 window.clearPush.clicked.connect(clear)
+window.backgroundPush.clicked.connect(window.backColor)
+window.backgroundPush.clicked.connect(background)
 
 while(1):
     #if (window.clearPush.clicked == True):
