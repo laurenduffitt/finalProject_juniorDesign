@@ -7,6 +7,8 @@ from PyQt6.QtGui import QColor
 from pathlib import *
 import numpy as np
 import cv2 as cv
+import tkinter as tk
+from PIL import Image as im
 
 
 class MainWindow(QMainWindow):
@@ -15,14 +17,17 @@ class MainWindow(QMainWindow):
         uic.loadUi("doodleBob.ui", self) 
         self.setWindowTitle("DoodleBob")
 
-        #default pen color = red, default background color = black, default 
+        self.graphContainer = QWidget()
+        self.gridLayout = QGridLayout(self.graphContainer)
+
+        #default pen color = blue, default background color = black, default 
         self.color = [0,0,255]
         self.backgroundColor = [0,0,0]
         self.penSize = 5
 
         self.slider.setMinimum(1)
         self.slider.setMaximum(15)
-
+        self.slider.setValue(7)
 
     #Pulls up the color selection menu
     def colorSelect(self):
@@ -31,9 +36,9 @@ class MainWindow(QMainWindow):
         colorHex = self.color.name()
          
         #getting the hex value into RGB format
-        blue = (16 * int(colorHex[1],16)) + (int(colorHex[2],16))
+        red = (16 * int(colorHex[1],16)) + (int(colorHex[2],16))
         green = (16 * int(colorHex[3],16)) + (int(colorHex[4],16))
-        red = (16 * int(colorHex[5],16)) + (int(colorHex[6],16))
+        blue = (16 * int(colorHex[5],16)) + (int(colorHex[6],16))
 
         self.color = [red,green,blue]
 
@@ -60,22 +65,26 @@ def clear():
     newColor = window.backgroundColor
     p2 = 0, 512    
     p3 = 512, 0
-    cv.rectangle(img, p2, p3, (newColor[0],newColor[1],newColor[2]), cv.FILLED)
+    cv.rectangle(img, p2, p3, (newColor[2],newColor[1],newColor[0]), cv.FILLED)
 
 def background():
     newColor = window.color
     p2 = 0, 512    
     p3 = 512, 0
-    cv.rectangle(img, p2, p3, (newColor[0],newColor[1],newColor[2]), cv.FILLED)
+    cv.rectangle(img, p2, p3, (newColor[2],newColor[1],newColor[0]), cv.FILLED)
 
+def saveImage():
+    data = im.fromarray(img)
+    data.save('drawing.png')
 
-
-
+def exitProgram():
+    exit()
 
 #Creating the Qapp file
 app = QApplication(sys.argv)
 window = MainWindow()
 
+#creating the image to draw on
 img = np.zeros((512,512,3), np.uint8)
 
 #functions that connect to the functions in the MainWindow of the user interface
@@ -85,12 +94,14 @@ window.clearPush.clicked.connect(clear)
 window.backgroundPush.clicked.connect(window.backColor)
 window.backgroundPush.clicked.connect(background)
 window.slider.valueChanged.connect(window.sliderChanged)
+window.savePush.clicked.connect(saveImage)
+window.exitPush.clicked.connect(exitProgram)
 
 while(1):
     color = window.color
-    red = color[0]
+    red = color[2]
     green = color[1]
-    blue = color[2]
+    blue = color[0]
 
     param = [(red,green,blue)]
     cv.namedWindow('image')
